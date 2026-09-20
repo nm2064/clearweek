@@ -1,0 +1,14 @@
+{
+  "name": "clearweek",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "A quiet place to turn deadlines into a realistic weekly plan.",
+  "scripts": {
+    "start": "node tools/serve.js",
+    "test": "node --test",
+    "check": "node --check src/app.js && node --check sw.js && node --test"
+  },
+  "engines": { "node": ">=22" },
+  "license": "MIT"
+}

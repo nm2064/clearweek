@@ -1,0 +1,12 @@
+{
+  "name": "ClearWeek",
+  "short_name": "ClearWeek",
+  "description": "Make room for what matters. A private weekly deadline planner.",
+  "id": "./",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#f6f7f2",
+  "theme_color": "#173f35",
+  "icons": [{ "src": "assets/icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any" }]
+}

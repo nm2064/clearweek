@@ -57,11 +57,11 @@ function render() {
   $('#nav-count').textContent = currentPlan.active.length;
   $('#planned-time').textContent = duration(currentPlan.scheduled);
   $('#free-time').textContent = duration(currentPlan.free);
-  $('#risk-count').replaceChildren(String(currentPlan.atRisk.length), element('span', { class: 'stat-unit' }, currentPlan.atRisk.length === 1 ? 'task' : 'tasks'));
+  $('#risk-count').replaceChildren(String(currentPlan.atRisk.length) + ' ', element('span', { class: 'stat-unit' }, currentPlan.atRisk.length === 1 ? 'task' : 'tasks'));
   $('#planned-detail').textContent = `${currentPlan.active.length} open task${currentPlan.active.length === 1 ? '' : 's'} · ${duration(currentPlan.capacity)} available`;
   $('#risk-detail').textContent = currentPlan.atRisk.length ? 'A little more time or a smaller task' : 'Your deadlines are looking good';
   $('#demo-note').hidden = !state.isDemo;
-  $('#task-count').textContent = state.tasks.length;
+  $('#task-count').textContent = ` ${state.tasks.length}`;
   renderFocus();
   renderWeek();
   renderAgenda();
@@ -99,7 +99,7 @@ function renderWeek() {
       'aria-pressed': day.date === selectedDay ? 'true' : 'false', 'aria-label': `${displayDate(day.date)}, ${duration(day.used)} planned of ${duration(day.capacity)} available` },
     element('span', { class: 'day-name' }, displayDate(day.date, { weekday: 'short' })),
     element('span', { class: 'day-number' }, displayDate(day.date, { day: 'numeric' })), meterSpace,
-    element('span', { class: 'day-hours' }, `${duration(day.used)} / ${duration(day.capacity)}`));
+    element('span', { class: 'day-hours' }, `${day.used / 60}h / ${day.capacity / 60}h`));
   }));
 }
 

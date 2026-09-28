@@ -1,5 +1,5 @@
 const prefix = `clearweek:${self.registration.scope}:`;
-const cacheName = prefix + 'v1';
+const cacheName = prefix + 'v3';
 const files = ['.', 'index.html', 'styles.css', 'assets/icon.svg', 'manifest.webmanifest',
   'src/app.js', 'src/planner.js', 'src/dates.js', 'src/storage.js', 'src/calendar.js'];
 

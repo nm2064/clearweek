@@ -1,0 +1,14 @@
+{
+  "lucide": [
+    "lucide-icons/lucide",
+    "5a92b9ba262de5bf10e864219883267672c05db8"
+  ],
+  "geist": [
+    "vercel/geist-font",
+    "10dc7658f13c38a474cde201bb09a4617267545b"
+  ],
+  "radix": [
+    "radix-ui/colors",
+    "dbdb85470547c7d34b9001f48fddb08ded335979"
+  ]
+}

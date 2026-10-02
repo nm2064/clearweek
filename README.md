@@ -2,7 +2,7 @@
 
 [![Checks](https://github.com/nm2064/clearweek/actions/workflows/check.yml/badge.svg)](https://github.com/nm2064/clearweek/actions/workflows/check.yml)
 
-**Turn a pile of deadlines into a week that fits.**
+**Your tasks, deadlines, and available time in one place.**
 
 ClearWeek is a small, private planner for students, side projects, and busy weeks. Add a deadline, estimate the work, and choose how much time you have each day. It makes a suggested plan and shows where you need more room.
 
@@ -17,6 +17,7 @@ ClearWeek is a small, private planner for students, side projects, and busy week
 - Add, edit, search, and complete tasks across different projects.
 - Set your available hours for each day of the week.
 - See a suggested daily plan, with earlier deadlines first.
+- Browse a seven-day task board and filter tasks by project area.
 - Spot overdue work and tasks that need more time.
 - Log progress and undo your last change.
 - Save and restore a backup, or export deadlines to a calendar.
@@ -61,5 +62,7 @@ Browser checks cover adding and editing tasks, progress, completion, Undo, searc
 ## Built with
 
 Plain JavaScript, HTML, and CSS. The planning logic is separate from the screen, so it can be tested without a browser. The app uses browser storage and a service worker for offline access. There is no build step or outside runtime dependency.
+
+The interface uses locally bundled Lucide icons, Geist fonts, and Radix colour scales. Their sources and licenses are listed in [UI credits](THIRD_PARTY.md). The week board scrolls horizontally on smaller screens; the rest of the page fits the screen.
 
 Created by [Noman Maqsudi](https://github.com/nm2064). Released under the [MIT license](LICENSE).

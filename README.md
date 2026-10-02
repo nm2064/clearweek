@@ -10,14 +10,15 @@ ClearWeek is a small, private planner for students, side projects, and busy week
 
 ![ClearWeek showing an example week](docs/preview.png)
 
-[View the phone layout](docs/mobile.png)
+[View the phone layout](docs/mobile.png) · [View the task list](docs/tasks.png)
 
 ## What you can do
 
 - Add, edit, search, and complete tasks across different projects.
 - Set your available hours for each day of the week.
 - See a suggested daily plan, with earlier deadlines first.
-- Browse a seven-day task board and filter tasks by project area.
+- Switch between a seven-day board and a separate task list.
+- Open daily details when you need them, and filter tasks by project area.
 - Spot overdue work and tasks that need more time.
 - Log progress and undo your last change.
 - Save and restore a backup, or export deadlines to a calendar.
@@ -64,5 +65,7 @@ Browser checks cover adding and editing tasks, progress, completion, Undo, searc
 Plain JavaScript, HTML, and CSS. The planning logic is separate from the screen, so it can be tested without a browser. The app uses browser storage and a service worker for offline access. There is no build step or outside runtime dependency.
 
 The interface uses locally bundled Lucide icons, Geist fonts, and Radix colour scales. Their sources and licenses are listed in [UI credits](THIRD_PARTY.md). The week board scrolls horizontally on smaller screens; the rest of the page fits the screen.
+
+The quieter layout and motion follow selected guides from [MengTo Skills](https://github.com/MengTo/Skills) and [Emil Kowalski's skills](https://github.com/emilkowalski/skills). Tabs slide, forms fade into place, and the board has a short first entrance. Keyboard actions stay immediate. The app respects your device's reduced-motion setting and uses browser features rather than an animation package.
 
 Created by [Noman Maqsudi](https://github.com/nm2064). Released under the [MIT license](LICENSE).

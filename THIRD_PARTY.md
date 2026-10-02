@@ -9,3 +9,10 @@ ClearWeek includes these open-source assets, downloaded from the linked GitHub p
 | [Radix Colors](https://github.com/radix-ui/colors) | Light gray and blue colour scales | [MIT](licenses/radix-colors.txt) |
 
 The exact source revisions are recorded in [docs/ui-sources.json](docs/ui-sources.json). The planner's layout, task blocks, and interactions are written for ClearWeek.
+
+## Design guidance
+
+- [MengTo Skills](https://github.com/MengTo/Skills): `agency-grid-layout-minimal`, `animation-systems`, and `beautiful-shadows` informed the spacing, motion, and layered shadows.
+- [Emil Kowalski's skills](https://github.com/emilkowalski/skills): `animate` and `emil-design-eng` informed the short transitions, anchored menus, keyboard behaviour, and reduced-motion support.
+
+These guides were used during development. They are not shipped as app dependencies.

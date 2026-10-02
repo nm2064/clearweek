@@ -2,6 +2,7 @@ import { today, addDays, daysBetween, displayDate, duration, weekday } from './d
 import { makePlan, remaining } from './planner.js';
 import { loadState, saveState, readBackup, emptyState, validateState } from './storage.js';
 import { calendarFile } from './calendar.js';
+import { setupMotion } from './motion.js';
 
 const $ = selector => document.querySelector(selector);
 let storage;
@@ -65,53 +66,26 @@ function render() {
   currentPlan = makePlan(state.tasks, state.capacities, start);
   if (!currentPlan.days.some(day => day.date === selectedDay)) selectedDay = start;
   $('#today-label').textContent = displayDate(start, { weekday: 'long', day: 'numeric', month: 'long' });
-  $('#nav-count').textContent = currentPlan.active.length;
   $('#planned-time').textContent = duration(currentPlan.scheduled);
   $('#free-time').textContent = duration(currentPlan.free);
   $('#risk-count').replaceChildren(String(currentPlan.atRisk.length) + ' ', element('span', { class: 'stat-unit' }, currentPlan.atRisk.length === 1 ? 'task' : 'tasks'));
-  $('#planned-detail').textContent = `${currentPlan.active.length} open task${currentPlan.active.length === 1 ? '' : 's'} · ${duration(currentPlan.capacity)} available`;
-  $('#risk-detail').textContent = currentPlan.atRisk.length ? 'Review these deadlines' : 'No deadline conflicts';
+  $('#attention-label').textContent = currentPlan.atRisk.length === 1 ? 'needs attention' : 'need attention';
+  $('#attention-open').disabled = currentPlan.atRisk.length === 0;
   $('#demo-note').hidden = !state.isDemo;
   $('#task-count').textContent = ` ${state.tasks.length}`;
-  renderFocus();
   renderWeek();
   renderAgenda();
   renderRisk();
-  renderTasks();
   renderProjects();
+  renderTasks();
 }
 
 function renderProjects() {
-  const projects = new Map();
-  for (const task of currentPlan.active) {
-    const name = task.project || 'Personal';
-    const group = projects.get(name) || { task, count: 0 };
-    group.count += 1;
-    projects.set(name, group);
-  }
-  $('#project-list').replaceChildren(...[...projects].map(([name, group]) =>
-    element('button', { class: `project-filter colour-${projectColour(group.task)}${selectedProject === name ? ' active' : ''}`, 'data-action': 'project', 'data-project': name, 'aria-pressed': selectedProject === name ? 'true' : 'false' },
-      element('span', { class: 'project-dot', 'aria-hidden': 'true' }), element('span', {}, name),
-      element('span', { class: 'project-count' }, ` ${group.count}`))));
-}
-
-function renderFocus() {
-  const day = currentPlan.days.find(value => value.sessions.length);
-  if (!day) {
-    $('#focus-content').replaceChildren(element('h2', {}, currentPlan.active.length ? 'Set your available hours' : 'Your next task goes here'),
-      element('p', { class: 'focus-reason' }, currentPlan.active.length ? 'Choose how much time you have each day to build your plan.' : 'Add a task and a deadline to get started.'),
-      element('button', { class: 'button primary', 'data-action': currentPlan.active.length ? 'availability' : 'add' }, currentPlan.active.length ? 'Set your time' : 'Add your first task'));
-    return;
-  }
-  const task = state.tasks.find(value => value.id === day.sessions[0].taskId);
-  $('#focus-content').replaceChildren(
-    element('h2', {}, task.title),
-    element('div', { class: 'focus-meta' }, element('span', { class: 'small-badge' }, task.project || 'Personal'), element('span', { class: 'small-badge' }, dueLabel(task.due))),
-    element('p', { class: 'focus-reason' }, `${duration(remaining(task))} remaining · ${day.date === today() ? 'Start today' : `Planned for ${displayDate(day.date)}`}`),
-    element('div', { class: 'focus-actions' },
-      element('button', { class: 'button primary', 'data-action': 'log', 'data-id': task.id }, icon('clock-3'), 'Log progress'),
-      element('button', { class: 'text-button', 'data-action': 'complete', 'data-id': task.id }, icon('check'), 'Mark complete')),
-  );
+  const projects = [...new Set(state.tasks.map(task => task.project || 'Personal'))].sort();
+  if (selectedProject && !projects.includes(selectedProject)) selectedProject = null;
+  $('#project-filter').replaceChildren(element('option', { value: '' }, 'All areas'),
+    ...projects.map(name => element('option', { value: name }, name)));
+  $('#project-filter').value = selectedProject || '';
 }
 
 function renderWeek() {
@@ -122,7 +96,6 @@ function renderWeek() {
     const blocks = [...grouped].map(([id, minutes]) => {
       const task = state.tasks.find(value => value.id === id);
       return element('span', { class: `work-block colour-${projectColour(task)}` },
-        element('span', { class: 'block-project' }, task.project || 'Personal'),
         element('strong', { class: 'block-title' }, task.title),
         element('span', { class: 'block-duration' }, icon('clock-3'), duration(minutes)));
     });
@@ -147,6 +120,7 @@ function renderAgenda() {
   $('#agenda-time').textContent = `${duration(day.used)} planned`;
   const sessions = new Map();
   for (const session of day.sessions) sessions.set(session.taskId, (sessions.get(session.taskId) || 0) + session.minutes);
+  $('#agenda-count').textContent = `${sessions.size} task${sessions.size === 1 ? '' : 's'} · ${duration(day.used)}`;
   if (!sessions.size) {
     $('#agenda-list').replaceChildren(element('p', { class: 'empty-message' }, day.capacity ? 'Nothing reserved for this day. Enjoy the space, or add a task.' : 'A day with no planned work. Leave it open or set some time.'));
     return;
@@ -167,15 +141,13 @@ function renderRisk() {
   const task = currentPlan.atRisk[0];
   const result = currentPlan.results.get(task.id);
   const text = result.status === 'overdue' ? `${task.title} is overdue, with ${duration(remaining(task))} left.` : `${task.title} needs ${duration(result.unscheduled)} more before ${displayDate(task.due)}.`;
-  $('#risk-note').replaceChildren(element('p', {}, element('strong', {}, 'A little adjustment needed. '), text),
+  $('#risk-note').replaceChildren(element('p', {}, text),
     element('button', { class: 'text-button', 'data-action': 'review' }, 'Review tasks', icon('arrow-up-right')));
 }
 
 function renderTasks() {
   const query = $('#search').value.trim().toLowerCase();
   const filter = $('#task-filter').value;
-  $('#area-filter').hidden = selectedProject === null;
-  $('#area-filter-name').textContent = selectedProject || '';
   const tasks = state.tasks.filter(task => {
     const status = currentPlan.results.get(task.id).status;
     return (selectedProject === null || (task.project || 'Personal') === selectedProject) &&
@@ -321,9 +293,17 @@ document.addEventListener('click', event => {
   if (action === 'edit') openTask(id);
   if (action === 'log') openLog(id);
   if (action === 'availability') openAvailability();
-  if (action === 'day') { selectedDay = button.dataset.date; render(); }
-  if (action === 'review') { selectedProject = null; $('#search').value = ''; $('#task-filter').value = 'attention'; renderTasks(); renderProjects(); $('#tasks').scrollIntoView({ behavior: 'smooth' }); }
-  if (action === 'project') { selectedProject = selectedProject === button.dataset.project ? null : button.dataset.project; $('#search').value = ''; $('#task-filter').value = 'open'; renderTasks(); renderProjects(); $('#tasks').scrollIntoView({ behavior: 'smooth' }); }
+  if (action === 'day') {
+    selectedDay = button.dataset.date;
+    document.querySelectorAll('.day').forEach(day => {
+      const selected = day.dataset.date === selectedDay;
+      day.classList.toggle('selected', selected);
+      day.setAttribute('aria-pressed', selected ? 'true' : 'false');
+    });
+    renderAgenda();
+    $('#day-details').open = true;
+  }
+  if (action === 'review') reviewAttention();
   if (action === 'complete') completeTask(id, true);
   if (action === 'delete') {
     const next = structuredClone(state);
@@ -348,7 +328,8 @@ $('#add-task').addEventListener('click', () => openTask());
 $('#availability-open').addEventListener('click', openAvailability);
 $('#search').addEventListener('input', renderTasks);
 $('#task-filter').addEventListener('change', renderTasks);
-$('#clear-area').addEventListener('click', () => { selectedProject = null; renderTasks(); renderProjects(); });
+$('#project-filter').addEventListener('change', event => { selectedProject = event.target.value || null; renderTasks(); });
+$('#attention-open').addEventListener('click', reviewAttention);
 $('#start-empty').addEventListener('click', () => update(emptyState(), 'A clean week, ready for your own tasks.'));
 $('#export-backup').addEventListener('click', () => download(`clearweek-${today()}.json`, JSON.stringify(state, null, 2), 'application/json'));
 $('#export-calendar').addEventListener('click', () => { download('clearweek-deadlines.ics', calendarFile(state.tasks), 'text/calendar'); toast('Deadline file saved. Import it into your calendar.'); });
@@ -370,12 +351,47 @@ $('#undo-button').addEventListener('click', () => {
   toast('Your previous plan is back.');
 });
 $('#toast-close').addEventListener('click', () => { $('#toast').hidden = true; });
-document.querySelectorAll('.nav-link').forEach(link => link.addEventListener('click', () => {
-  document.querySelectorAll('.nav-link').forEach(value => value.classList.toggle('active', value === link));
-}));
+function showView(name, focus = false) {
+  const tasks = name === 'tasks';
+  $('#week-view').hidden = tasks;
+  $('#tasks-view').hidden = !tasks;
+  $('.view-switch').dataset.view = tasks ? 'tasks' : 'week';
+  for (const view of ['week', 'tasks']) {
+    const tab = $(`#${view}-tab`);
+    tab.setAttribute('aria-selected', String(view === name));
+    tab.tabIndex = view === name ? 0 : -1;
+  }
+  if (focus) $(`#${name}-tab`).focus();
+  history.replaceState(null, '', tasks ? '#tasks' : '#week');
+}
+
+function reviewAttention() {
+  selectedProject = null;
+  $('#project-filter').value = '';
+  $('#search').value = '';
+  $('#task-filter').value = 'attention';
+  renderTasks();
+  showView('tasks', true);
+}
+
+document.querySelectorAll('[role="tab"]').forEach(tab => {
+  tab.addEventListener('click', () => showView(tab.dataset.view));
+  tab.addEventListener('keydown', event => {
+    if (!['ArrowLeft', 'ArrowRight', 'Home', 'End'].includes(event.key)) return;
+    event.preventDefault();
+    const name = event.key === 'Home' ? 'week' : event.key === 'End' ? 'tasks' : tab.dataset.view === 'week' ? 'tasks' : 'week';
+    showView(name, true);
+  });
+});
+
+window.addEventListener('hashchange', () => {
+  if (['#week', '#tasks'].includes(location.hash)) showView(location.hash.slice(1));
+});
 
 if (loaded.warning) { $('#storage-warning').textContent = loaded.warning; $('#storage-warning').hidden = false; $('#save-label').textContent = 'Saved data needs attention'; }
 render();
+showView(location.hash === '#tasks' ? 'tasks' : 'week');
+setupMotion();
 setInterval(() => { if (today() !== lastDay) { lastDay = today(); selectedDay = lastDay; render(); } }, 60000);
 
 if ('serviceWorker' in navigator) {

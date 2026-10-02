@@ -7,6 +7,14 @@
     "vercel/geist-font",
     "10dc7658f13c38a474cde201bb09a4617267545b"
   ],
+  "mengto-skills": [
+    "MengTo/Skills",
+    "d5bd3a7e9c9f4b00853e84fffa60bc38eee9e744"
+  ],
+  "emil-skills": [
+    "emilkowalski/skills",
+    "d16ebe60d09a5ba2afcb7054ede9d0a10c9f6128"
+  ],
   "radix": [
     "radix-ui/colors",
     "dbdb85470547c7d34b9001f48fddb08ded335979"
